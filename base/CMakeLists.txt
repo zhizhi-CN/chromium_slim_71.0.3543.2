@@ -1333,8 +1333,8 @@ else()
     ) 
 endif()
 
-if (NOT IS_LINUX)
-    chromium_source_remove(
+if (IS_LINUX)
+    chromium_source_append(
         OUT_VAR
             BASE_SRCS
         FILES
@@ -1344,15 +1344,14 @@ if (NOT IS_LINUX)
             "nix/xdg_util.h"
             "sys_info_linux.cc"
     )
-    if (NOT IS_ANDROID)
-        chromium_source_remove(
-            OUT_VAR
-                BASE_SRCS
-            FILES 
-                "linux_util.cc"
-                "linux_util.h"
-        )
-    endif()
+elseif (NOT IS_ANDROID)
+    chromium_source_remove(
+        OUT_VAR
+            BASE_SRCS
+        FILES 
+            "linux_util.cc"
+            "linux_util.h"
+    )
 endif()
 
 if (IS_IOS)
