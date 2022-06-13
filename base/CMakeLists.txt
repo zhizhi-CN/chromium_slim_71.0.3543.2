@@ -1701,8 +1701,22 @@ endif()
 
 if (IS_POSIX)
     list(APPEND BASE_PUBLIC_LIBRARIES        
-        "atomic"
+
         "dl"
+    )
+endif()
+
+if (IS_MAC)
+    list(APPEND BASE_PUBLIC_LIBRARIES
+        "-framework ApplicationServices"
+        "-framework AppKit"    
+        "-framework CoreFoundation"
+        "-framework Foundation"
+        "-framework IOKit"
+        "-framework Security"        
+    )
+    list(APPEND BASE_PUBLIC_LIBRARIES
+        "bsm"
     )
 endif()
 
@@ -1711,6 +1725,7 @@ if (IS_LINUX)
     add_subdirectory(third_party/xdg_user_dirs)
     
     list(APPEND BASE_PRIVATE_LIBRARIES "pthread")
+    list(APPEND BASE_PRIVATE_LIBRARIES "atomic")
     list(APPEND BASE_PRIVATE_LIBRARIES chromium::xdg_mime)
     list(APPEND BASE_PRIVATE_LIBRARIES chromium::xdg_user_dirs)
 endif()

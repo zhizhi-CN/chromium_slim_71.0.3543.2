@@ -56,8 +56,8 @@ typedef unsigned int NSSearchPathDomainMask;
 typedef struct CF_BRIDGED_TYPE(id) __SecKey* SecKeyRef;
 typedef struct CF_BRIDGED_TYPE(id) __SecPolicy* SecPolicyRef;
 #else
-typedef struct OpaqueSecKeyRef* SecKeyRef;
-typedef struct OpaqueSecPolicyRef* SecPolicyRef;
+typedef struct CF_BRIDGED_TYPE(id) __SecKey* SecKeyRef;
+typedef struct CF_BRIDGED_TYPE(id) __SecPolicy* SecPolicyRef;
 #endif
 
 namespace base {
