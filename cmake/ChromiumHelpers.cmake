@@ -109,15 +109,20 @@ function(chromium_cc_library)
         ${CHROMIUM_CC_LIB_PUBLIC_COPTS}
     )
 
-    target_link_libraries(${_NAME}
-      PRIVATE 
-        ${CHROMIUM_CC_LIB_LIBRARIES}
+    target_link_options(${_NAME}    
+      PRIVATE
         ${CHROMIUM_CC_LIB_LINKOPTS}
         ${CHROMIUM_DEFAULT_LINKOPTS}
       PUBLIC
         ${CHROMIUM_DEFAULT_PUBLIC_LINKOPTS}
-        ${CHROMIUM_CC_LIB_PUBLIC_LIBRARIES}
         ${CHROMIUM_CC_LIB_PUBLIC_LINKOPTS}
+    )
+    target_link_libraries(${_NAME}
+      PRIVATE
+        ${CHROMIUM_CC_LIB_LIBRARIES}
+      PUBLIC
+        ${CHROMIUM_CC_LIB_PUBLIC_LIBRARIES}
+        
     )
     target_compile_definitions(${_NAME} 
       PRIVATE
