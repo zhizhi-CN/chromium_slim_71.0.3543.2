@@ -1707,6 +1707,12 @@ if(IS_WIN)
         "ws2_32.lib"
         "wbemuuid.lib"
     )
+    list(APPEND BASE_COPTS
+        "/Zi"
+    )
+    list(APPEND BASE_LINKOPTS
+        "/DEBUG"
+    )
 endif()
 
 if (IS_POSIX)

@@ -10,10 +10,10 @@ class ChromiumBaseSlimConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "dcheck_always_on":[True, False]}
     default_options = {"shared": False, "fPIC": True, "dcheck_always_on": False}
+    
     generators = "CMakeDeps"
-    
     build_policy = "missing"
-    
+
     @property
     def _build_subfolder(self):
         return "build_subfolder"
@@ -69,7 +69,7 @@ class ChromiumBaseSlimConan(ConanFile):
         self.cpp_info.components["base"].includes= ["include"]
         self.cpp_info.components["base"].libs = ["chromium_base", "chromium_modp_b64"]
         self.cpp_info.components["base"].defines.append("NO_TCMALLOC")
-        
+
         if self.options.dcheck_always_on:
             self.cpp_info.components["base"].defines.append("DCHECK_ALWAYS_ON")
 
