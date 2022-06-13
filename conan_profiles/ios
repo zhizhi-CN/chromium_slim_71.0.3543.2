@@ -1,0 +1,12 @@
+include(default)
+
+[settings]
+os=iOS
+os.version=9.0
+arch=armv8
+arch_build=x86_64
+compiler=apple-clang
+compiler.libcxx=libc++
+
+[build_requires]
+darwin-toolchain/1.0.8
