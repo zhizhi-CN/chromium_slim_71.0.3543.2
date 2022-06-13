@@ -35,7 +35,7 @@ function(chromium_generate_jar_jni)
             OUTPUT
                 ${JNI_HDR}
             COMMAND 
-                ${PYTHON_EXECUABLE} ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/script/jni_generator.py
+                ${PYTHON_EXECUABLE} ${CMAKE_SOURCE_DIR}/base/android/jni_generator/jni_generator.py
                 "--jar_file=${generate_jar_jni_JAR}"
                 "--input_file=${CLASS}"  
                 "--output_dir=${generate_jar_jni_GEN_DIR}/jni"
@@ -75,12 +75,11 @@ function(chromium_generate_java_jni)
             OUTPUT
                 ${JNI_HDR}
             COMMAND 
-                ${PYTHON_EXECUABLE} ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/script/jni_generator.py 
+                ${PYTHON_EXECUABLE} ${CMAKE_SOURCE_DIR}/base/android/jni_generator/jni_generator.py
                 "--input_file=${INPUT_JAVA}" 
                 "--output_dir=${generate_java_jni_GEN_DIR}/jni"
                 "--include=${generate_java_jni_INCLUDES}"
                 "--ptr_type=long"
-                "--native_exports_optional"
             DEPENDS
                 ${INPUT_JAVA}
             COMMENT 

@@ -84,6 +84,7 @@ list(APPEND CHROMIUM_LLVM_FLAGS
     "-Wno-implicit-fallthrough"
     "-Wthread-safety" 
     "-Wno-extra-semi" 
+    "-Wno-unknown-warning-option"
     "-Wno-builtin-macro-redefined"
     "-Wno-missing-field-initializers" 
     "-Wno-unused-parameter" 
@@ -108,6 +109,7 @@ list(APPEND CHROMIUM_LLVM_FLAGS
 )
 
 list(APPEND CHROMIUM_LLVM_PUBLIC_FLAGS
+    "-Wno-unknown-warning-option"
     "-Wno-defaulted-function-deleted"
     "-Wno-implicit-const-int-float-conversion"
 )
