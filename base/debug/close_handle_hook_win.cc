@@ -157,34 +157,41 @@ void EATPatch(HMODULE module, const char* function_name,
 #pragma warning(pop)
 }
 
-// Performs an IAT interception.
+BOOL _DoPatch(base::win::IATPatchFunction* patch,
+             HMODULE module, const char* function_name,
+    void* new_function) {
+  __try {
+    // There is no guarantee that |module| is still loaded at this point.
+    if (patch->PatchFromModule(module, "kernel32.dll", function_name,
+                               new_function)) {
+      delete patch;
+      return FALSE;
+    }
+  } __except ((GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ||
+               GetExceptionCode() == EXCEPTION_GUARD_PAGE ||
+               GetExceptionCode() == EXCEPTION_IN_PAGE_ERROR)
+                  ? EXCEPTION_EXECUTE_HANDLER
+                  : EXCEPTION_CONTINUE_SEARCH) {
+    // Leak the patch.
+    return FALSE;
+  }
+}
+    // Performs an IAT interception.
 base::win::IATPatchFunction* IATPatch(HMODULE module, const char* function_name,
                                       void* new_function, void** old_function) {
   if (!module)
     return NULL;
 
   base::win::IATPatchFunction* patch = new base::win::IATPatchFunction;
-  __try {
-    // There is no guarantee that |module| is still loaded at this point.
-    if (patch->PatchFromModule(module, "kernel32.dll", function_name,
-                               new_function)) {
-      delete patch;
-      return NULL;
+  if (_DoPatch(patch, module, function_name, new_function)) {
+    if (!(*old_function)) {
+      // Things are probably messed up if each intercepted function points to
+      // a different place, but we need only one function to call.
+      *old_function = patch->original_function();
     }
-  } __except((GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ||
-              GetExceptionCode() == EXCEPTION_GUARD_PAGE ||
-              GetExceptionCode() == EXCEPTION_IN_PAGE_ERROR) ?
-             EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
-    // Leak the patch.
-    return NULL;
+    return patch;    
   }
-
-  if (!(*old_function)) {
-    // Things are probably messed up if each intercepted function points to
-    // a different place, but we need only one function to call.
-    *old_function = patch->original_function();
-  }
-  return patch;
+  return NULL;
 }
 
 // Keeps track of all the hooks needed to intercept functions which could

@@ -24,9 +24,7 @@ void CreateSyntheticHeapCorruption() {
 }
 
 }  // namespace
-
-void TerminateWithHeapCorruption() {
-  __try {
+void _TerminateWithHeapCorruption() {
     // Pre-Windows 10, it's hard to trigger a heap corruption fast fail, so
     // artificially create one instead.
     if (base::win::GetVersion() < base::win::VERSION_WIN10)
@@ -42,10 +40,15 @@ void TerminateWithHeapCorruption() {
     memset(addr_mutable - sizeof(addr), 0xCC, sizeof(addr));
 
     HeapFree(heap, 0, addr);
-    HeapDestroy(heap);
+    HeapDestroy(heap);  
+}
+
+void TerminateWithHeapCorruption() {
+  __try {
+    _TerminateWithHeapCorruption();
   } __except (EXCEPTION_EXECUTE_HANDLER) {
     // Heap corruption exception should never be caught.
-    CHECK(false);
+//    CHECK(false);
   }
   // Should never reach here.
   abort();
