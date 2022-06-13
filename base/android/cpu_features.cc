@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <cpu-features.h>
-
+#include "base/third_party/cpufeatures/cpu-features.h"
 #include "base/android/jni_android.h"
+
 #include "jni/CpuFeatures_jni.h"
 
 namespace base {

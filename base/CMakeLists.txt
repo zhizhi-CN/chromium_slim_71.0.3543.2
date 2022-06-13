@@ -1,6 +1,7 @@
 include(ChromiumBuildFlagHeader)
 include(ChromiumBuildDate)
 include(ChromiumBuildConfig)
+include(ChromiumJniGenerator)
 include(ChromiumSource)
 
 if (NOT IS_WIN AND NOT IS_IOS)
@@ -1447,7 +1448,7 @@ if (IS_POSIX AND NOT IS_ANDROID AND NOT IS_MAC)
     )
 endif()
 
-if (IS_POSIX AND NOT IS_ANDROID AND NOT IS_NACL)
+if (IS_POSIX AND NOT IS_MAC AND NOT IS_NACL)
     chromium_source_append(        
         OUT_VAR
             BASE_SRCS
@@ -1456,7 +1457,7 @@ if (IS_POSIX AND NOT IS_ANDROID AND NOT IS_NACL)
     )
 endif()
 
-if (IS_POSIX AND NOT IS_ANDROID AND NOT IS_IOS)
+if (IS_POSIX AND NOT IS_MAC AND NOT IS_IOS)
     chromium_source_append(        
         OUT_VAR
             BASE_SRCS
@@ -1483,6 +1484,60 @@ if (NOT USE_GLIB)
         FILES 
             "message_loop/message_pump_glib.cc"
             "message_loop/message_pump_glib.h"
+    )
+endif()
+
+
+if (IS_ANDROID)
+    file(TO_CMAKE_PATH "$ENV{ANDROID_HOME}/platforms/android-31/android.jar" android_sdk_jar)
+    chromium_generate_jar_jni(
+        NAME
+            android_runtime_jni_headers
+        JAR
+            "${android_sdk_jar}"
+        GEN_DIR
+            "${CMAKE_CURRENT_BINARY_DIR}"            
+        CLASSES
+            "java/lang/Runtime.class"
+    )
+
+    chromium_generate_java_jni(
+        NAME
+            base_jni_headers          
+        GEN_DIR
+            "${CMAKE_CURRENT_BINARY_DIR}"
+        JAVA_SRCS
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/AnimationFrameTimeHistogram.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/ApkAssets.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/ApplicationStatus.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/BuildInfo.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/Callback.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/CommandLine.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/ContentUriUtils.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/CpuFeatures.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/EarlyTraceEvent.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/EventLog.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/FieldTrialList.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/ImportantFileWriterAndroid.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/JNIUtils.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/JavaExceptionReporter.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/JavaHandlerThread.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/LocaleUtils.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/MemoryPressureListener.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/PathService.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/PathUtils.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/PowerMonitor.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/SysUtils.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/ThreadUtils.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/TimeUtils.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/TimezoneUtils.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/TraceEvent.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/UnguessableToken.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/library_loader/LibraryLoader.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/metrics/RecordHistogram.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/metrics/RecordUserAction.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/metrics/StatisticsRecorderAndroid.java"
+            "${CMAKE_CURRENT_SOURCE_DIR}/android/java/src/org/chromium/base/process_launcher/ChildProcessService.java"
     )
 endif()
 
@@ -1575,7 +1630,29 @@ chromium_buildflag_header(
         "IS_HWASAN=0"
 )
 
+chromium_buildflag_header(
+    NAME
+        "anchor_functions_buildflags"
+    HEADER
+        "anchor_functions_buildflags.h"
+    HEADER_DIR
+         "base/android/library_loader"  
+    FLAGS
+      "USE_LLD=0"
+      "SUPPORTS_CODE_ORDERING=0"
+)
 
+chromium_buildflag_header(
+    NAME
+        orderfile_buildflags
+    HEADER 
+        "orderfile_buildflags.h"
+    HEADER_DIR
+        "base/android/orderfile"    
+    FLAGS
+      "DEVTOOLS_INSTRUMENTATION_DUMPING=0"
+      "ORDERFILE_INSTRUMENTATION=0"
+)     
 
 chromium_buildflag_header(
     NAME
@@ -1623,8 +1700,7 @@ if(IS_WIN)
 endif()
 
 if (IS_POSIX)
-    list(APPEND BASE_PUBLIC_LIBRARIES
-        "pthread"
+    list(APPEND BASE_PUBLIC_LIBRARIES        
         "atomic"
         "dl"
     )
@@ -1634,12 +1710,26 @@ if (IS_LINUX)
     add_subdirectory(third_party/xdg_mime)
     add_subdirectory(third_party/xdg_user_dirs)
     
+    list(APPEND BASE_PRIVATE_LIBRARIES "pthread")
     list(APPEND BASE_PRIVATE_LIBRARIES chromium::xdg_mime)
     list(APPEND BASE_PRIVATE_LIBRARIES chromium::xdg_user_dirs)
 endif()
 
 if(USE_LIBEVENT)
     list(APPEND BASE_PRIVATE_LIBRARIES chromium::libevent)
+endif()
+
+if (IS_ANDROID)
+    add_subdirectory("third_party/cpufeatures")
+
+    list(APPEND BASE_PUBLIC_LIBRARIES "log")
+    list(APPEND BASE_PUBLIC_LIBRARIES "android")    
+    list(APPEND BASE_PRIVATE_LIBRARIES chromium::android_runtime_jni_headers)
+    list(APPEND BASE_PRIVATE_LIBRARIES chromium::base_jni_headers)
+    list(APPEND BASE_PRIVATE_LIBRARIES chromium::cpufeatures)
+    list(APPEND BASE_PRIVATE_LIBRARIES chromium::anchor_functions_buildflags)
+    list(APPEND BASE_PRIVATE_LIBRARIES chromium::orderfile_buildflags)
+    list(APPEND BASE_PRIVATE_LIBRARIES chromium::ashmem)
 endif()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${BASE_SRCS})

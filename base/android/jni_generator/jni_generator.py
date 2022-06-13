@@ -17,16 +17,6 @@ import sys
 import textwrap
 import zipfile
 
-CHROMIUM_SRC = os.path.join(
-    os.path.dirname(__file__), os.pardir, os.pardir, os.pardir)
-BUILD_ANDROID_GYP = os.path.join(
-    CHROMIUM_SRC, 'build', 'android', 'gyp')
-
-sys.path.append(BUILD_ANDROID_GYP)
-
-from util import build_utils
-
-
 # Match single line comments, multiline comments, character literals, and
 # double-quoted strings.
 _COMMENT_REMOVER_REGEX = re.compile(
@@ -1311,7 +1301,7 @@ def GenerateJNIHeader(input_file, output_file, options):
       jni_from_java_source = JNIFromJavaSource.CreateFromFile(
           input_file, options)
       content = jni_from_java_source.GetContent()
-  except ParseError, e:
+  except ParseError as e:
     print e
     sys.exit(1)
   if output_file:
@@ -1326,6 +1316,10 @@ def WriteOutput(output_file, content):
       existing_content = f.read()
       if existing_content == content:
         return
+
+  if output_file:
+    if not os.path.exists(os.path.dirname(os.path.abspath(output_file))):
+      os.makedirs(os.path.dirname(os.path.abspath(output_file)))
   with open(output_file, 'w') as f:
     f.write(content)
 
