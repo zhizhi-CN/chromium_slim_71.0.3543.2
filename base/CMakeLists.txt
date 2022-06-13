@@ -1379,12 +1379,17 @@ if (IS_IOS)
             "sync_socket.h"
             "sync_socket_posix.cc"
             "synchronization/waitable_event_watcher.h"
+                    
     ) 
     chromium_source_append(
         DISABLE_FILTER
         OUT_VAR
             BASE_SRCS
         FILES
+            "allocator/allocator_interception_mac.h"
+            "allocator/allocator_interception_mac.mm"
+            "allocator/malloc_zone_functions_mac.cc"
+            "allocator/malloc_zone_functions_mac.h"         
             "base_paths_mac.h"
             "base_paths_mac.mm"
             "file_version_info_mac.h"
@@ -1717,6 +1722,18 @@ if (IS_MAC)
     )
     list(APPEND BASE_PUBLIC_LIBRARIES
         "bsm"
+    )
+endif()
+
+if (IS_IOS)
+    list(APPEND BASE_PUBLIC_LIBRARIES
+        "-framework CoreGraphics"
+        "-framework CoreText"
+        "-framework Foundation"        
+        "-framework UIKit"
+    )
+    list(APPEND BASE_LINKOPTS
+        "-fobjc-link-runtime"
     )
 endif()
 

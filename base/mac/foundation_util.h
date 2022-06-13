@@ -52,13 +52,9 @@ typedef CR_FORWARD_ENUM(unsigned int, NSSearchPathDirectory);
 typedef unsigned int NSSearchPathDomainMask;
 #endif
 
-#if defined(OS_IOS)
+typedef struct CF_BRIDGED_TYPE(id) __SecCertificate* SecCertificateRef;
 typedef struct CF_BRIDGED_TYPE(id) __SecKey* SecKeyRef;
 typedef struct CF_BRIDGED_TYPE(id) __SecPolicy* SecPolicyRef;
-#else
-typedef struct CF_BRIDGED_TYPE(id) __SecKey* SecKeyRef;
-typedef struct CF_BRIDGED_TYPE(id) __SecPolicy* SecPolicyRef;
-#endif
 
 namespace base {
 
