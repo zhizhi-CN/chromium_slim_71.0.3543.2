@@ -8,10 +8,10 @@ class ChromiumBaseSlimConan(ConanFile):
     version = "71.0.3543.2"
     author = "jinggang.li@hiscene.com"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    generators = "cmake_find_package"
-
+    options = {"shared": [True, False], "fPIC": [True, False], "dcheck_always_on":[True, False]}
+    default_options = {"shared": False, "fPIC": True, "dcheck_always_on": False}
+    generators = "CMakeDeps"
+    
     build_policy = "missing"
     
     @property
@@ -39,6 +39,8 @@ class ChromiumBaseSlimConan(ConanFile):
 
     def build(self):
         _cmake = CMake(self)
+        if self.options.dcheck_always_on:
+            _cmake.definitions["DCHECK_ALWAYS_ON"] = True        
         _cmake.configure(build_folder=self._build_subfolder)
         _cmake.verbose = True
         _cmake.build()
@@ -51,16 +53,51 @@ class ChromiumBaseSlimConan(ConanFile):
         self.copy("build/*.h", dst="include")
         self.copy("testing/*.h", dst="include")
         self.copy("third_party/*.h", dst="include")
-
+        self.copy("*.h", src=self._build_subfolder, dst="include")
+        
         _cmake = CMake(self)
         _cmake.configure(build_folder=self._build_subfolder)
         _cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "ChromiumBaseSlim")
+        self.cpp_info.set_property("cmake_file_name", "ChromiumSlim")
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_module_file_name", "ChromiumSlim")
+        self.cpp_info.set_property("pkg_config_name", "ChromiumSlim")
+
         self.cpp_info.components["base"].set_property("cmake_target_name", "chromium::base")
         self.cpp_info.components["base"].includes= ["include"]
-        self.cpp_info.components["base"].libs = ["chromium_base"]
+        self.cpp_info.components["base"].libs = ["chromium_base", "chromium_modp_b64"]
+        self.cpp_info.components["base"].defines.append("NO_TCMALLOC")
         
+        if self.options.dcheck_always_on:
+            self.cpp_info.components["base"].defines.append("DCHECK_ALWAYS_ON")
+
+        if self.settings.os not in ["Windows", "iOS"]:
+            self.cpp_info.components["base"].libs += ["chromium_libevent"]
+                        
+        if self.settings.os == "Linux":
+            self.cpp_info.components["base"].libs += [
+                "chromium_xdg_mime",
+                "chromium_xdg_user_dirs",
+            ]
         if self.settings.os == "Windows":
-            self.cpp_info.components["base"].system_libs = ["dbghelp","version","shlwapi","userenv","Winmm","Powrprof","ws2_32","SetupAPI"]
+            self.cpp_info.components["base"].defines.append("NOMINMAX")
+            self.cpp_info.components["base"].defines.append("WIN32_LEAN_AND_MEAN")  
+            self.cpp_info.components["base"].defines.append("UNICODE") 
+            self.cpp_info.components["base"].defines.append("_UNICODE")
+            self.cpp_info.components["base"].system_libs = [
+                "cfgmgr32.lib",
+                "powrprof.lib",
+                "propsys.lib",
+                "setupapi.lib",
+                "userenv.lib",
+                "winmm.lib",
+                "shell32.lib",
+                "dbghelp.lib",
+                "version.lib",
+                "shlwapi.lib",
+                "ws2_32.lib",
+                "wbemuuid.lib",
+            ]
+

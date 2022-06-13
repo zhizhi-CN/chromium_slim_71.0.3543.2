@@ -1671,7 +1671,12 @@ chromium_buildflag_header(
 )
 
 
-list(APPEND BASE_PUBLIC_DEFINES "NO_TCMALLOC")
+
+list(APPEND BASE_PUBLIC_DEFINES NO_TCMALLOC)
+if (DCHECK_ALWAYS_ON)
+	list(APPEND BASE_PUBLIC_DEFINES DCHECK_ALWAYS_ON)
+endif()
+
 list(APPEND BASE_PRIVATE_LIBRARIES chromium::allocator_buildflags)
 list(APPEND BASE_PRIVATE_LIBRARIES chromium::cfi_buildflags)
 list(APPEND BASE_PRIVATE_LIBRARIES chromium::debugging_buildflags)
@@ -1766,7 +1771,6 @@ endif()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${BASE_SRCS})
 chromium_cc_library(
-    SHARED
     NAME
         base
     SRCS
@@ -1776,7 +1780,6 @@ chromium_cc_library(
         ${CMAKE_SOURCE_DIR}
     PUBLIC_DEFINES
         ${BASE_PUBLIC_DEFINES}
-        "BASE_IMPLEMENTATION"
     COPTS
         ${CHROMIUM_EXCEPTIONS_FLAG}
         ${BASE_COPTS}          
