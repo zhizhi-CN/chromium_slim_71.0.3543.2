@@ -1,3 +1,4 @@
+from email import generator
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 

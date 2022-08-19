@@ -55,6 +55,7 @@ vs-chromium-project.txt
 /.externalToolBuilders/
 /.settings/
 /.vs/
+/.cache/
 # Visual Studio Code
 /.vscode/
 /_out
